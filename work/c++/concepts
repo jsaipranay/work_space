@@ -1,0 +1,87 @@
+What are the concepts involved in C++??
+
+APIE
+====
+Abstraction: Hiding the unwanted data and showing the necessary information using Access Specifiers[public:, private: , protected:]
+
+Polymorphism:
+Compile time polymorphism[function overloading,operator overloading]
+Run time polymorphism[function overriding(nothing but virtual concept)]
+
+Inheritance: Single,mutliple,multilevel,Hierarchical,Hybrid inheritance
+Diamond inheritance [This creates a Ambiguity problem,so use virtual class inheritance to resolve it]
+FYI: Diamond inheritance comes under Hybrid inheritance
+
+Ecapsulation: Wrapping all data members[variables,functions] within an entity like class
+******************************************************************************************
+
+
+What is the size of this class in 32bit and 64bit compiler/system?
+
+#include<iostream>
+using namespace std;
+
+class X
+{
+static int y;
+int func2()
+{
+return y;
+}
+
+virtual void func()=0;
+virtual void func1();
+
+public:
+virtual ~X() =0; //pure virtual destructor
+};
+
+int main()
+{
+cout<<sizeof(X)<<endl;
+}
+
+static 0 bytes
+int func() 0 bytes
+virtual 4 bytes  and 
+ans:32 bit 4bytes ,if u used multiple virtual u have only one vpointer.
+64 bits 8 bytes
+******************************************************************************************
+object slicing:
+
+base and derived:
+we can extract base from the derived but we cannot extract derived from base lost of data leads to object slicing.
+
+
+******************************************************************************************************
+singleton:
+
+
+
+
+
+****************************************************
+types of   desig patterns":
+
+1.singleton design pattern
+2.observed design pattern
+3.factory design pattern
+4.abstrsct fsctort design patttern
+5.adapter design pattern
+6.proxy design pattern
+7.prototype design pattern.
+
+
+******************************
+shallow copy:
+partially copy of object.
+shallow copy leads to dangling pointer.
+
+deep copy:
+
+
+*********************
+no virtual constructer because initailisation is done in vpinter and vtable at the 
+
+
+*******************************************************

@@ -1,0 +1,5 @@
+x=open('testing_file_opening.txt','w')
+x.write("this is frst line")
+x.write("\n")
+x.write("second line")
+x.close()

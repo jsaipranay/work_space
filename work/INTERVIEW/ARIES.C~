@@ -1,0 +1,111 @@
+C,Linux,IPC Questions:
+=============
+1.What is Priority Inheritance?
+2.Write your own strcat()?
+3.Write the power function[x power y]?
+4.What is volatile keyword ? Where do we use
+5.What is register ? declaration ?Why is it used?
+6.What is constant variable ? Why do we use?
+7.Write the code for getting the no. of bites set count in a number?
+8.Where is static and constant variables get stored ?
+9.Implement string palindrome without using string reverse?
+10.What is Dangling pointer? Explain few scenarios
+11.What is Segmentation fault? Scenarios for it?
+12.How to allocate memory to a ptr without deleting the existing
+memory?Write the syntax for the same?
+13.What is null pointer? Why do we use it?
+14.What is wild,void pointer? Where do we use void type pointer
+15.Explain static and dynamic linking libraries?
+16.What is the difference b/w Thread and Process
+17.What are the different types of IPC's available?
+18.Explain Each IPC in detail?
+19.What is the difference b/w Message Queue and Pipe?
+20.What are the Synchronization Techniques available? Explain Each in
+detail
+21.What is semaphore? How many types of semaphores are available?
+22.Difference Questionsb/w counting and binary semaphore?
+23.Difference b/w Binary Semaphore and mutex?
+24.A Binary semaphore with condition variables,Can it behave like mutex?
+25.Reverse the given string using stack ?
+26.What are bit fields?Why do we use it?Explain in detail with examples
+27.What is core dump? How do you use gdb?Explain gdb in detail
+28.How to do gdb for multi-threaded application
+29.What is Zombie process?
+30.What is Orphan process?
+31.What is Half duplex and duplex?
+32.Difference b/w stream and message oriented?
+
+DS related Questions:
+=====================
+1.Explain how do you implement stack using queues?
+2.Explain how do you implement Queue using Stacks?
+3.Reverse single linked list Recursively
+4.Delete nodes in unsorted linked list?
+5.Implement stack and queue using linked list?
+6.Given a Single pointer to a node of Single linked list,How to do you
+delete that node?
+7.Find the middle node using only pointer
+8.How to find circular loop in Single linked list?
+
+C++ Questions:
+===============
+1.Explain few design patterns with real time examples?
+2.What is Singleton class? Explain with code
+3.What is Abstract class? Explain with code
+4.What is observer pattern? Explain with code
+5.What is virtual function? Why do we use?
+6.What is pure virtual function ?Will it have body? Why do we use?
+7.What is Abstract class? Why do we use?
+8.What is virtual constructor and virtual destructor?
+9.Explain vptr and vtble using virtual function?
+10.How many vtbles n vptrs are created for a Base n its Derived class?
+11.Where does vptr initialization takes place?When does vtable get
+created[compile time/Run time]?
+12.What does vtble contain?
+13.What is object slicing?Where does it occur?
+14.Implement constructor,copy constructor and assignment operator for a
+class with single pointer,constant variable?
+15.What is Initializer list?Why do we use it?
+
+
+
+*************************************
+
+
+Who is the Author of c language? 
+In PC where c program stored & Run?
+ASCII full form?
+Diff btw sdram and dram?
+Types of ROM?
+What is Round robin scheduling?
+Which is the default scheduling algorithm in PC?
+What happened when PC start (Boot process )?
+About i2c.... Spi and i2c Diff?
+What is meant by Volatile and non-volatile memory?
+C language is interpreter or compile based Lang?
+What are Storage classes?
+Compilation steps of c prog?
+ User and kernel specs Diff?
+What is volatile and const qualifiers? 
+C prog to swap a number without temp. 
+In Single link list add at begin and delete last node.
+ Implement atox. 
+What is Dynamic memory allocation?
+Diff betw malloc and calloc?
+How interrupt works?
+ How to handle interrupt? 
+What is the Use of gpio pins?
+What r process states?
+Process and thread Diff.
+Mutex & semaphore Diff.
+What is shared memory and message queue?
+  Diff betw Tcp & udp? 
+What is meant by connection less and connection oriented ?
+ Diff betw polling and interrupt give one Example of polling?
+Soft and hard rtos Diff?
+Monolithic and micro kernel Diff?
+What is Initramfs, initrd,rootfs and ramfs?
+what is inline function?
+Main purpose of inline fn?
+what are the steps to bring-up the board?
+

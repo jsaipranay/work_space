@@ -1,0 +1,72 @@
+How driver will handle if system in sleep mode or resume mode.
+what is memory barrier and wbp .
+Any API will call before calling init_module() in kernel space?
+spinlock optimization in current kernel versions.
+Difference between spin_lock_irq and spin_lock_irqsave() in detail.
+Bottom halfs and differences. Work queue types.
+Differences in kernel versions which we worked.
+How probe will work for PCI drivers.
+How to debug coredump file without stack trace.
+
+C questions:
+
+Reverse words in given sentence. like " Global Edge" to "egdE labolG"
+Given no is multiple of 8 or not with bitwise operators.
+Delete node in given position. Should cover all corner cases.
+Difference between const pointer and pointer const.
+About Volatile keyword.
+
+
+C Questions :
+
+1. preprocessor directives .
+2. why we using #define to define a constant . rather than by using keyword..i.e like int a =10;
+3. To toggle a particular bit and set a bit and clear bit.
+4. to check number is multiplies of 4 or not.without using % operator.
+5. To check meachine is little endian or big endian..?
+6. reverse string without any arthimatic operation and tmp variable , loops also...?
+7. To insert element in particular position in array.
+8. diference b/w structure and union...and real time appilications..with respect to memory.
+9. malloc operations(failed conditions).
+10. bitfilelds
+11.selfreferential structure...what is use of selfreferential structure...?
+12. static functions and static variables...inclideing characterstics...?
+13. In case of volatile, how the compiler takes the data every time from 14.memory, not from the cache
+
+D.S :
+
+1. insert a node at partcular position in single linked list...
+
+Linux :
+
+1.difference b/w fork and vfork.
+2.copy on write(COW).
+3.interrupts handling in o.s...how interupt handled by os..?
+4.dif b/w semaphore and mutex...real time applications...?
+5.spin locks ..brifely
+6.memory barries.
+7.mmap system call working.
+8. process states.
+Device Drivers :
+
+1. any driver in linux
+2. how driver interact with H/w....explaination
+3.driver architecture..?
+
+Digital Electronics:
+
+1.what is active low signal.
+2.discussion on logic gates(AND ,OR ,NOT,XOR,XNOR);
+3.discussion on MUX.
+4.power gateing and Edge gating...?
+5.what is PLL and PLC...?
+6.what is pipeling
+7.tell me any processor ..?
+8. memory hirarcy
+9.what is cache memory..why using cache memory
+10.cache ratio
+11. how cache memory interact with processor..?
+12.ARM ARCHITECTURE...?
+
+Note: please make sure concentrate on ARM architectre.
+

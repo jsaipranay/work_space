@@ -1,0 +1,18 @@
+structures;
+->struct keword
+->members of structure doesnot share memeory,alloacate memory seperate for each mem
+->members of structures can be acces at any time individually
+->all the mem of strute are intiliazed
+->change of vale of structe cannot effcet other menm instructure
+->tital size sum of all individual data types
+
+unions:
+->unnion
+->unions share memory among all its meme,no need to assign indivudal memeory
+->any  a time inly single memory can be acccesed
+->only  first mem of union are initilaed
+->chnage val effects oyhe mem
+->size highest data type
+
+
+

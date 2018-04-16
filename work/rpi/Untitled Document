@@ -1,0 +1,33 @@
+1.JTAG pin configuration program:
+
+download JtagEnabler.cpp for Rpi1 from internet and crosscompile it and generate a.out and put executable(./a.out)in the SD card partition.
+
+*****************************************************
+
+2.Enabling JTAG pins :
+
+After SD card flashed , put it in the board's SD card slot.Then After when kernel boot and you get the prompt, go to the directory where ./a.out was kept and execute it.
+
+username and password to login into board :
+username : pi
+password : raspberry
+
+******************************************************
+
+3.Trace32 :
+
+After making connection as shown in the wiki image , launch trace32 and execute below commnad in t32 prompt.
+SYSTEM.CPU ARM1176JZF
+and then as shown in attched image tronchip.png , untick all the exceptions listed under "set" tab .Then execute below command
+SYSTEM.CPUACCESS Enable
+SYSTEM.MODE ATTACH
+DATA.LOAD.ELF c:\Users\Administrator\Documents\new\linux-rpi-3.10.y\vmlinux /NOCODE[copy vmlinux file from linux to window using winscp]
+Y.SPATH.SRD c:\Users\Administrator\Documents\new\linux-rpi-3.10.y\
+
+Now , you are ready to set the breakpoint and debug ,but this will let you to debug only kernel code in which you have place
+breakpoint and if application call that function but you will not able to debug the code which is executing in the start of the kernel
+becuase we are enabling JTAG pins after kernel boots ; so to debug at kernel booting level , implement the JtagEnable.cpp logic
+before kernel boots at uboot level.
+*****************************************************
+
+

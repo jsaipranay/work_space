@@ -1,0 +1,323 @@
+storage classes:
+wehave 4 storage clases
+segment,scope,lifetime,initial value,keyword
+
+1.auto->loacl variables->stack segment->function scope->life:fucn nvoction and fuction devlaration->garbage->auto
+
+
+2.global-->global varibales-->data or bss->program scope->prmanent through out the execution of program-->zeros->np key word
+
+
+3.static-->both local nd global --> data,bsss,stack-->file scope-->through out the program execution-->zeros-->static
+                 
+global static                        local static
+ 
+
+>cannot used for unions and structures
+>values exist between multiple function invocaton
+      
+4.register-->local varibled used freq->cpu-->block-->
+adv:
+>accesing data from cpu is faster than accesing data frm ram
+>we can reduce the trasition on system bus using register memory stores in cpu
+>reister keyword apply to varibales which are used frequntly
+>if cpu regisgters are full memory goes to stack
+disadv:
+>max size 32 bit r 4bytes
+>we cannot acces the base address 
+>cannot hold float and double values
+
+***************
+project:development of high speed serial driver
+h/w:x86,rs 232 db9 connector.
+target board:arm 9(core9g25) 
+
+
+module_init,--->initialising the register the module moodule
+
+module -exit--->existing and un register
+
+>register ur driver as charcter driver using register_chardev-region(devmo,8,name,)
+>request-region(io base,8,name).....>/proc/ioports-->CHECK WHEATER THE H/W is free are busy
+>ser-init(base adress,trq line)--->here we are going to initialise the members of device context info
+
+rd index,wr inder,no of char,rd index,wr index,no of char,base adreesss,irq line no.
+we are going to set he baud rate:
+
+
+****LCR REGISTER 7 6 5 4 3 2 1 0*****
+
+7BIT  DLAB
+0 	0	RD
+0	1	WR
+1	0	DLLB
+1	1	DLHB
+6BIT-->set break condition
+3,4,5-->used for parity checking
+2 bit-->no of stop bits [wordleng 5=1stopbit,wordlen 6 7 8=1.5 to 2 stop bits
+BIT0	BIT1 WORDLEN(BITS)
+0	0	5B
+0	1  	6B
+1	0	7B
+1	1	8B
+
+******************
+IER 7 6 5 4 3 2 1 0
+0BIT-->RBR FULL
+1BIT-->THB EMPTY
+2BIT-->MODEMSTSUTS
+3BIT-->LINE STSTUS
+*******************
+IIR 7 6 5 4 3 2 1 0
+
+6BIT	7BIT
+0	0	NO FIFO
+0 	1	FIFO ENABLED NOT IN USE
+1	1	FIFO USED
+
+
+0BIT 
+0--->INTERUPPT IS PENDING(RAISED)    
+1--->NO INTERUUPT
+
+
+2BIT	1BIT
+0	0	MODEM STATUS REG
+0	1	THB EMPTY
+1	0	RBR FULL
+1	1	LINE STATUS
+***************************
+MCR  7 6 5 4 3 2 1 0
+
+0BIT-->ETSABLISH LINT(DTR DATA TERMINAL READY)
+1BIT-->SEND DATA(RTS READY TERMINAL SEND)
+dsr
+cts
+****************************************
+Requset-irq(irq no,my int handker,sa-interruot,serdev,null)
+to copy base address of interuprt handler to interruort vector tale entry maintained in kernel
+>success return value is zero
+>/proc/interrupts
+******************************
+open-->sys-->open-->mydev-open(inode,file objec)
+open system calls used to link the kenel
+
+open retutnd fd,
+>inode or vnode or metadata contains size,permisiions,user id ,groupid,major no,minor no,devvice context info base address.
+>file object:curser,mode,owner,private data,inode base adddress
+>file description :ser in.ser out.ser err,rd,wr
+
+open
+{
+
+trimodule get(this module)-->where driver is loaded base adress(ref cont no of app);
+file->f-mode(RD,WR)
+
+
+OPP SITE TO OPEN CLOSE
+
+*************************************
+WRITE -->	SYS-WRITE-->mydev -write(file objject,bufer,count,offset)
+
+THB EMPTY raises an interrupt,interuprts are respnsible for write in to THQ bufer using copy from user
+interuprt handler executes,irq line no raisies cpu stop normal execution and my interrupt handler executres using OUTB CALL we are writting data ino tranmist buffer register
+
+}
+*********************************
+read-->myser-read(file,bufer,count,ofset)
+using semaphores we are over come the updating isuue
+>
+using INB call raises an ineruupt when RBR register has data writing into RQ buffer and to application using copy to user
+
+*********************************
+
+dump 
+boot loaders,kernal iamge,rootfile ssytem,device tree..
+minicom terminal set target boards baud rate using TFTP ERVER FLASH THE IMAGES
+**********************************************************************
+
+
+
+
+MQTT PROTOCAL
+
+
+ESP8266 WIFI MODULE TOOOOO.----------------->THINGER.IO(CLOUD)------------->LAPII OR CELL
+
+CODE
+0	0	OFF
+0	1	CLOCK WISE
+1	0	ANTICLOCK WISE
+USING AURDINO IDE WRITE THE CODE
+*******************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

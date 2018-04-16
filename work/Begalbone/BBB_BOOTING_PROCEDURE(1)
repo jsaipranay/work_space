@@ -1,0 +1,284 @@
+Setup Embedded Linux Development Environment:
+(Ubuntu Minimal FS Porting on beaglebone black using Ownbuilt Binaries):
+
+
+1.Install Required Pacakges:
+------------------------------
+1. Install Cross Compile toolchain
+	$ sudo apt-get install gcc-arm-linux-gnueabi
+2. Install Device Tree Compiler
+	$ sudo apt-get install device-tree-compiler
+3. Install u-boot-tools (mkimage)
+	$ sudo apt-get install u-boot-tools
+	$ sudo apt-get install ncurses-dev
+
+2. Ubuntu Minimal FS Porting on beaglebone black using Prebuilt Binaries:
+----------------------------------------------------------------------
+Using SDCard:
+------------
+1. Prepare an SD Card with 2 partitions: one for the boot and one for the rootfs. 
+   1.sudo mkfs.vfat /dev/sdb1                       //format the sd card partition
+   2.sudo mkfs.vfat -F 32 -n "BOOT" /dev/sdb1       //for rename partition
+   3.sudo mkfs.ext4 /dev/sdb2
+   4.sudo mkfs.ext4 -L "ROOTFS" /dev/sdb2
+
+2. Copy files over to the boot partition:
+   $ cp MLO u-boot.img  uEnv.txt  /media/$USER/boot
+3. copy root file system.
+   $ cd ~
+   $ mkdir rootfs
+   $ sudo mount /dev/sdbx2 rootfs
+   $ sudo tar xJvf ubuntu-trusty-14.04-rootfs-3.14.4.1-bone-armhf.com.tar.xz -C rootfs
+   $ sudo umount rootfs
+4. After insert the SD card on BBB, update software packages otherwise sudo permission problem encounter.
+   $ sudo apt-get update (user name:ubuntu; Password:ubuntu)
+5. Insert SDcard on BBB target and press switch2 and power on board. Now BBB booting from SD card.
+
+...................................................................................................
+ Setup u-boot Development Environment:
+-----------------------------------------
+1. U-boot Configuration & Compilation
+	1.1. Download u-boot source code
+        	https://github.com/u-boot/u-boot
+	1.2. U-boot Configuration
+        	$ cd ~/BBB/uboot-2016
+		Input: configs/am335x_evm_defconfig	
+	    	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- am335x_evm_config
+		output: ".config" file
+	1.3. U-boot Compilation
+		Input: ".config" file
+        	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi-
+		output: 
+		u-boot.bin is the binary compiled U-Boot bootloader.
+		u-boot.img contains u-boot.bin along with an additional header to be used by the boot ROM to determine how and where to load and execute U-Boot.
+
+
+.............................................................................................................
+ Setup Linux Kernel Development Environment:
+-----------------------------------------------
+1. Linux Kernel 3.14 Configuration & Compilation:
+	1.1. Download kernel source code from kernel masters server.
+             https://git.kernel.org/
+	1.2. Kernel Configuration
+        	$ cd ~/BBB/linux-3.16.53 
+        	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- beaglebone_defconfig
+        	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- menuconfig
+	1.3. kernel Compilation
+        	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- uImage LOADADDR=0x80008000 -j4
+		Location:- arch/arm/boot
+	1.4. dtbs compilation
+        	$ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- dtbs
+		Location:- arch/arm/boot/dts (am335x-boneblack.dts)
+.......................................................................................................
+Create uEnv.txt
+.................
+
+mmcroot=/dev/mmcblk0p2 ro
+mmcrootfstype=ext4 rootwait
+console=ttyO0,115200n8
+mmcargs=setenv bootargs console=${console} ${optargs} root=${mmcroot} rootfstype=${mmcrootfstype}
+loadfdt=load mmc ${mmcdev}:2 ${fdtaddr} /boot/dtbs/${fdtfile}
+loaduimage=mw.l 4804c134 fe1fffff; if load mmc 0:2 ${loadaddr} /boot/zImage; then setenv mmcdev 0; mw.l 4804c194 01200000; echo Booting from external microSD...; else setenv mmcdev 1; if test $mmc0 = 1; then setenv mmcroot /dev/mmcblk1p2 rw; fi; load mmc 1:2 ${loadaddr} /boot/zImage; mw.l 4804c194 00c00000; echo Booting from internal eMMC...; fi
+mmcboot=run mmcargs; bootz ${loadaddr} - ${fdtaddr}
+uenvcmd=i2c mw 0x24 1 0x3e; run findfdt; if test $board_name = A335BNLT; then setenv mmcdev 1; mmc dev ${mmcdev}; if mmc rescan; then setenv mmc1 1; else setenv mmc1 0; fi; fi; setenv mmcdev 0; mmc dev ${mmcdev}; if mmc rescan; then setenv mmc0 1; else setenv mmc0 0; fi; run loaduimage && run loadfdt && run mmcboot
+
+........................................................................................
+SD Card booting
+................
+Copy rootfs into sdcard ROOTFs directory
+sudo cp -r rootfs/* /media/pankaj/ROOTFS
+
+Copy MLO u-boot.img uEnv.txt and zImage in BOOT part of sd card
+sudo cp MLO u-boot.img uEnv.txt zImage /media/pankaj/BOOT
+.........................................................................
+
+Important Link
+https://github.com/pmezydlo/SPI_slave_driver_implementation/wiki
+
+https://elinux.org/BeagleBone_Black_Enable_SPIDEV
+
+
+https://www.linux.com/learn/how-access-chips-over-spi-beaglebone-black
+
+------------------------------------------------
+IDE=<your-device-name>
+SRC=$IDE.dts
+TMP=$IDE.tmp.dts
+DST=$IDE.dtb
+
+cpp -nostdinc -I include -undef -x assembler-with-cpp $SRC > $TMP
+dtc -O dtb -b 0 -o $DST $TMP
+rm $TMP
+
+.................................................
+vim am335x-bone-common.dtsi 
+
+
+&spi0 {
+         status = "okay";
+ //        pinctrl-names = "default";
+   //      pinctrl-0 = <&spi0_pins>;
+        spidev@0 {
+                  spi-max-frequency = <24000000>;
+                  reg = <0>;
+                  compatible = "SPI_ADC";
+        };
+};
+.....................................
+vim am335x-boneblack-common.dtsi
+
+ 	0x150 (PIN_OUTPUT_PULLUP | MUX_MODE0)
+        0x154 (PIN_INPUT_PULLUP | MUX_MODE0)
+        0x158 (PIN_INPUT_PULLUP | MUX_MODE0)
+        0x15C (PIN_OUTPUT_PULLUP | MUX_MODE0)
+
+................................
+
+for doing ssh in BBB
+vim /etc/network/interfaces
+.....................
+# interfaces(5) file used by ifup(8) and ifdown(8)
+
+# loopback network interface
+auto lo
+iface lo inet loopback
+
+# primary network interface
+auto eth0
+iface eth0 inet dhcp
+#hwaddress ether DE:AD:BE:EF:CA:FE
+
+# wireless network interface
+#auto wlan0
+#iface wlan0 inet dhcp
+#   wpa-ssid "my_wifi_name"
+#   wpa-psk  "my_wifi_pass"
+..............................
+
+ethernet connection with BBB 
+from cpu to BBB ethernet connectio
+on BBB terminal
+ubuntu@ubuntu-armhf:~$ sudo ifconfig eth0 172.16.9.11 (any ip)
+
+file sending from pc to BBB
+
+pankaj@pankaj:~/BBB/linux-4.14.19/arch/arm/boot/dts$ scp am335x-boneblack.dtb ubuntu@172.16.9.11:~ 
+
+
+
+---------------------------------------
+-------------------------------------
+---------------------------------------
+Bootable sd card partion
+
+sd card partition
+
+---------
+vim sdcardparttiton.sh
+
+#!/bin/bash
+if [ ! "$1" = "/dev/sda" ] ; then
+unset LANG
+DRIVE=$1
+if [ -b "$DRIVE" ] ; then
+dd if=/dev/zero of=$DRIVE bs=1024 count=1024
+SIZE=`fdisk -l $DRIVE | grep Disk | awk '{print $5}'`
+echo DISK SIZE - $SIZE bytes
+CYLINDERS=`echo $SIZE/255/63/512 | bc`
+echo CYLINDERS - $CYLINDERS
+{
+echo ,9,0x0C,*
+echo ,,,-
+} | sfdisk -D -H 255 -S 63 -C $CYLINDERS $DRIVE
+mkfs.vfat -F 32 -n "boot" ${DRIVE}1
+mkfs.ext4 -j -L "rootfs" ${DRIVE}2
+fi
+fi
+
+------------------------------------
+sudo chmod +x sdcardpartition.sh
+
+sudo ./sdcardpartition.sh /dev/sdb
+
+how to check sd card is bootable or not
+
+sudo fdisk /dev/sdb
+type p
+
+it will show
+----------------------
+ sudo fdisk /dev/sdb
+
+Command (m for help): p
+
+Disk /dev/sdb: 31.9 GB, 31914983424 bytes
+255 heads, 63 sectors/track, 3880 cylinders, total 62333952 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disk identifier: 0x00000000
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sdb1   *          63      144584       72261    c  W95 FAT32 (LBA)
+/dev/sdb2          144585    62332199    31093807+  83  Linux
+
+Command (m for help): w
+The partition table has been altered!
+
+Calling ioctl() to re-read partition table.
+
+WARNING: Re-reading the partition table failed with error 16: Device or resource busy.
+The kernel still uses the old table. The new table will be used at
+the next reboot or after you run partprobe(8) or kpartx(8)
+Syncing disks.
+
+--------------------------------------------
+------------------------------------------
+
+boot --MLO,uboot.img,env.txt
+rootfs--boot/dtbs/.dtb we need to copy after compiling the dts file.
+
+---------------------------------------
+----------------------------------------
+
+
+
+copying the files to partitions
+
+
+
+sudo cp -r boot/* /media/pankaj/boot/
+sudo cp -r rootfs/* /media/pankaj/rootfs/
+sudo umount /media/pankaj/boot
+sudo umount /media/pankaj/rootfs
+
+
+--------------------------------------
+---------------------------------------
+
+for sudo problem in BBB
+.............
+
+pankaj@pankaj:~$ sudo chown root:root /media/pankaj/rootfs/
+pankaj@pankaj:~$ sudo chmod 755 /media/pankaj/rootfs/
+pankaj@pankaj:~$ sudo chown root:root /media/pankaj/rootfs/usr/bin/sudo 
+pankaj@pankaj:~$ sudo chmod 4755 /media/pankaj/rootfs/usr/bin/sudo
+pankaj@pankaj:~$ sudo umount /dev/sdb1
+pankaj@pankaj:~$ sudo umount /dev/sdb2
+pankaj@pankaj:~$ sync
+pankaj@pankaj:~$ 
+................................................
+
+
+pankaj@pankaj:~/BBB/linux-4.14.19$ sudo make ARCH=arm CROSS_COMPILE=/home/pankaj/pkj/gcc-linaro-6.4.1-2017.11-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf- INSTALL_MOD_PATH=/media/pankaj/rootfs/ modules_install
+.....................................
+
+cat /sys/kernel/debug/pinctrl/44e10800.pinmux/pingroups
+
+
+
+
+
+
+
+

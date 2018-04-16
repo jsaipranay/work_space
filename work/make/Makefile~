@@ -1,0 +1,17 @@
+All=hello
+
+hello: sample1.o sample2.o sample3.o
+	gcc -c sample1.c
+
+sample1.o: sample1.c
+	gcc -c sample1.c
+
+sample2.o: sample2.c
+	gcc -c sample2.c
+
+sample3.o: sample3.c
+	gcc -c sample3.c
+
+
+clean:
+	rm -rf*.o hello

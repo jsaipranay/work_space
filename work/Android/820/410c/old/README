@@ -1,0 +1,112 @@
+STEP 1: GET THE SOURCE CODE
+Installing Repo:
+----------------
+=>create a bin directory in home
+
+mkdir ~/bin
+
+=>set the bin in your path.
+
+PATH=~/bin:$PATH
+
+=>Download repo python script from below link.
+
+curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+
+=>Give executable permission for that repo script.
+
+chmod a+x ~/bin/repo
+
+
+Initializing a Repo client:
+---------------------------
+
+=>Create a empty directory for android 
+
+mkdir WORKING_DIRECTORY
+cd WORKING_DIRECTORY
+
+=>Configure the git with name and mail ID
+
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
+
+=>Run repo init to bring down the latest version of Repo with all its most recent bug fixes. 
+
+repo init -u https://android.googlesource.com/platform/manifest
+
+Downloading the Android Source Tree:
+------------------------------------
+
+=>run sync command to download the source code.
+repo sync
+
+STEP 2:BUILD
+
+==> Setup environment.
+
+source build/envsetup.sh
+
+==>Choose a Target.
+
+lunch aosp_arm-eng
+
+==>Build the code.
+
+make -j4
+
+After compiling the source code :
+
+Flashing the image into dragin board
+
+step1: Check the images are created or not 
+PATH: /media/kadali/data/ANDROID/APQ8016_410C_LA.BR.1.2.7-01010-8x16.0_6.0.1_Marsh_Mallo_P2/out/target/product/msm8916_64$ 
+
+There will be 6 images 
+                                                    1)boot.img                                                  
+                                                    2)userdata.img                                          
+                                                    3)cache.img                                                
+                                                    4)recovery.img                                          
+                                                    5)persist.img                                            
+                                                    6)system.img  
+Images are created properly.
+
+step2:Install the tools related to adb
+platform-tools contains the executable for adb and fastboot use those in the required 
+directory(/media/kadali/data/ANDROID/APQ8016_410C_LA.BR.1.2.7-01010-8x16.0_6.0.1_Marsh_Mallo_P2/out/target/product/msm8916_64) 
+
+step3: run the commands to check the device is connected or not
+
+1)./adb devices 
+we will get :
+
+List of devices attached
+adb server version (32) doesn't match this client (39); killing...
+* daemon started successfully *
+45920c8 device
+
+2)./adb reboot bootloader
+
+3)./fastboot devices 
+we will get : 
+45920c8 fastboot
+
+step4: flash the image using the script 
+
+The script file named  (flash.sh) contains 
+./fastboot devices                                                              
+./fastboot flash boot boot.img                                                  
+./fastboot flash userdata userdata.img                                          
+./fastboot flash cache cache.img                                                
+./fastboot flash recovery recovery.img                                          
+./fastboot flash persist persist.img                                            
+./fastboot flash system system.img                                              
+./fastboot reboot   
+
+step5:After booting successfully  run the commands to check it is flashed or not
+ 
+1)adb device
+2)adb shell
+3)su
+4)dmesg | grep post
+

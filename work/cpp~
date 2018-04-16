@@ -1,0 +1,79 @@
+OOPS:
+APIE: Abstraction,Polymorphism,Inheritance,Encapsulation
+
+Abstraction: Hiding the unwanted data and displaying/showing the necessary information
+To achieve this feature,Access specifiers like public: , private: , protected: can be used
+
+Polymorphism:
+2types of Polymorphism
+Compile time polymorphism - function Overloading,operator Overloading
+Run time polymorphism - function Overriding i.e., virtual concept
+
+function Overloading:
+This uses the same function name but the No. of Arguments passed or the data type of the arguments will differ
+NOTE: Function overloading does not depend on the return type of the function
+           To implement function Overloading,we do not need class
+
+operator Overloading:
+This is used to do manipulations[unary(++,--),binary(+,-,/,%,*) operations] on class objects
+NOTE:Few operators that cannot be overloaded are
+Dot operator(.)
+Scope Resolution operator(:
+sizeof() operator
+typeid().name() operator
+
+function Overriding:
+This uses the same function with same syntax without any change in Arguments[Both Number,data type],return type
+Only the content/body of the function can be changed in function Overriding:
+NOTE: To implement function Overriding,we need class mandatorily
+
+virtual concept:
+virtual constructor -Does not Exists
+virtual destructor -Exists,Should be used mandatorily where base class ptr is used to delete the derived class object
+virtual base class -Exists,Should be used mandatorily to avoid ambiguity error in Hybrid inheritance
+virtual function -Exists,Used to avoid multiple functions in a class
+
+Inheritance: Child class inheriting the features of Parent class
+5types of Inheritance:
+Single
+Multiple
+Multi-level
+Hiearchical
+Hybrid
+Diamond inheritance is a special case of hybrid inheritance
+
+NOTE: In general, one problem arises with diamond inheritance
+           To resolve this Error, we should use virtual class concept
+
+Encapsulation:Wrapping all the data members[functions,variables] within the class
+
+Default data members within a class
+=>constructor
+=>destructor
+=>copy constructor
+=>assignment operator
+
+Casting types:
+static_cast<datatype>(variable)
+dynamic_cast<datatype>(variable)
+reinterpret_cast<datatype>(variable)
+const_cast<datatype>(variable)
+
+Other things to know in C++:
+Why don't we have virtual constructor?Reason?
+What is object slicing?Where do we get this?How to avoid this?
+What is shallow copy and deep copy ?
+What is self assignment check in assignment operator
+Difference b/w copy constructor and assignment operator?
+What is up casting and down casting in class?
+What is the difference b/w dynamic_cast and reinterpret_cast?
+
+
+
+
+
+
+
+
+
+

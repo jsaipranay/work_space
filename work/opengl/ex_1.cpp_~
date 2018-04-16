@@ -1,0 +1,13 @@
+#include<stdio.h>
+#include<GL/glut.h>
+int main(int argc,char **argv)
+{
+glutInit(&argc,argv);
+glutInitCreateWindow("WIndow");
+glutInitWindowposition(50,50);
+glutInitWindowSize(320,320);
+glutWindowFunc(display);
+initGL();
+glutMianLoop();
+return 0;
+}

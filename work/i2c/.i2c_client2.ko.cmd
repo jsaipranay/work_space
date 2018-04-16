@@ -1,0 +1,1 @@
+cmd_/home/juluri/ws/work/i2c/i2c_client2.ko := arm-linux-gnueabihf-ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/juluri/ws/work/i2c/i2c_client2.ko /home/juluri/ws/work/i2c/i2c_client2.o /home/juluri/ws/work/i2c/i2c_client2.mod.o ;  true

@@ -1,0 +1,413 @@
+--- CreateConnectionProcessor7.java	2017-12-12 16:42:30.050647000 +0530
++++ CreateConnectionProcessor8.java	2017-12-12 16:39:02.806649000 +0530
+@@ -17,23 +17,21 @@
+ package com.android.server.telecom;
+ 
+ import android.content.Context;
++import android.os.UserHandle;
+ import android.telecom.DisconnectCause;
+ import android.telecom.ParcelableConnection;
+-import android.telecom.Phone;
+ import android.telecom.PhoneAccount;
+ import android.telecom.PhoneAccountHandle;
+-import android.telephony.TelephonyManager;
+-import android.telephony.PhoneStateListener;
+-import android.telephony.ServiceState;
+ 
+ // TODO: Needed for move to system service: import com.android.internal.R;
+ 
++import com.android.internal.annotations.VisibleForTesting;
++
+ import java.util.ArrayList;
+ import java.util.Collection;
+ import java.util.HashSet;
+ import java.util.Iterator;
+ import java.util.List;
+-import java.util.Set;
+ import java.util.Objects;
+ 
+ /**
+@@ -43,7 +41,8 @@
+  *     to the user
+  *   - a connection service cancels the process, in which case the call is aborted
+  */
+-final class CreateConnectionProcessor {
++@VisibleForTesting
++public class CreateConnectionProcessor implements CreateConnectionResponse {
+ 
+     // Describes information required to attempt to make a phone call
+     private static class CallAttemptRecord {
+@@ -91,33 +90,41 @@
+     private final ConnectionServiceRepository mRepository;
+     private List<CallAttemptRecord> mAttemptRecords;
+     private Iterator<CallAttemptRecord> mAttemptRecordIterator;
+-    private CreateConnectionResponse mResponse;
++    private CreateConnectionResponse mCallResponse;
+     private DisconnectCause mLastErrorDisconnectCause;
+     private final PhoneAccountRegistrar mPhoneAccountRegistrar;
+     private final Context mContext;
+-    private boolean mShouldUseConnectionManager = true;
+     private CreateConnectionTimeout mTimeout;
++    private ConnectionServiceWrapper mService;
++    private int mConnectionAttempt;
+ 
+-    CreateConnectionProcessor(
++    @VisibleForTesting
++    public CreateConnectionProcessor(
+             Call call, ConnectionServiceRepository repository, CreateConnectionResponse response,
+             PhoneAccountRegistrar phoneAccountRegistrar, Context context) {
+         Log.v(this, "CreateConnectionProcessor created for Call = %s", call);
+         mCall = call;
+         mRepository = repository;
+-        mResponse = response;
++        mCallResponse = response;
+         mPhoneAccountRegistrar = phoneAccountRegistrar;
+         mContext = context;
++        mConnectionAttempt = 0;
+     }
+ 
+     boolean isProcessingComplete() {
+-        return mResponse == null;
++        return mCallResponse == null;
+     }
+ 
+     boolean isCallTimedOut() {
+         return mTimeout != null && mTimeout.isCallTimedOut();
+     }
+ 
+-    void process() {
++    public int getConnectionAttempt() {
++        return mConnectionAttempt;
++    }
++
++    @VisibleForTesting
++    public void process() {
+         Log.v(this, "process");
+         clearTimeout();
+         mAttemptRecords = new ArrayList<>();
+@@ -126,7 +133,7 @@
+                     mCall.getTargetPhoneAccount(), mCall.getTargetPhoneAccount()));
+         }
+         adjustAttemptsForConnectionManager();
+-        adjustAttemptsForEmergency();
++        adjustAttemptsForEmergency(mCall.getTargetPhoneAccount());
+         mAttemptRecordIterator = mAttemptRecords.iterator();
+         attemptNextPhoneAccount();
+     }
+@@ -138,7 +145,7 @@
+     void continueProcessingIfPossible(CreateConnectionResponse response,
+             DisconnectCause disconnectCause) {
+         Log.v(this, "continueProcessingIfPossible");
+-        mResponse = response;
++        mCallResponse = response;
+         mLastErrorDisconnectCause = disconnectCause;
+         attemptNextPhoneAccount();
+     }
+@@ -148,8 +155,8 @@
+ 
+         // Clear the response first to prevent attemptNextConnectionService from attempting any
+         // more services.
+-        CreateConnectionResponse response = mResponse;
+-        mResponse = null;
++        CreateConnectionResponse response = mCallResponse;
++        mCallResponse = null;
+         clearTimeout();
+ 
+         ConnectionServiceWrapper service = mCall.getConnectionService();
+@@ -190,33 +197,28 @@
+             }
+         }
+ 
+-        if (mResponse != null && attempt != null) {
++        if (mCallResponse != null && attempt != null) {
+             Log.i(this, "Trying attempt %s", attempt);
+             PhoneAccountHandle phoneAccount = attempt.connectionManagerPhoneAccount;
+-            ConnectionServiceWrapper service =
+-                    mRepository.getService(
+-                            phoneAccount.getComponentName(),
+-                            phoneAccount.getUserHandle());
+-            if (service == null) {
++            mService = mRepository.getService(phoneAccount.getComponentName(),
++                    phoneAccount.getUserHandle());
++            if (mService == null) {
+                 Log.i(this, "Found no connection service for attempt %s", attempt);
+                 attemptNextPhoneAccount();
+             } else {
++                mConnectionAttempt++;
+                 mCall.setConnectionManagerPhoneAccount(attempt.connectionManagerPhoneAccount);
+                 mCall.setTargetPhoneAccount(attempt.targetPhoneAccount);
+-                mCall.setConnectionService(service);
+-                setTimeoutIfNeeded(service, attempt);
++                mCall.setConnectionService(mService);
++                setTimeoutIfNeeded(mService, attempt);
+ 
+-                service.createConnection(mCall, new Response(service));
++                mService.createConnection(mCall, this);
+             }
+         } else {
+             Log.v(this, "attemptNextPhoneAccount, no more accounts, failing");
+-            if (mResponse != null) {
+-                clearTimeout();
+-                mResponse.handleCreateConnectionFailure(mLastErrorDisconnectCause != null ?
+-                        mLastErrorDisconnectCause : new DisconnectCause(DisconnectCause.ERROR));
+-                mResponse = null;
+-                mCall.clearConnectionService();
+-            }
++            DisconnectCause disconnectCause = mLastErrorDisconnectCause != null ?
++                    mLastErrorDisconnectCause : new DisconnectCause(DisconnectCause.ERROR);
++            notifyCallConnectionFailure(disconnectCause);
+         }
+     }
+ 
+@@ -240,10 +242,6 @@
+     }
+ 
+     private boolean shouldSetConnectionManager() {
+-        if (!mShouldUseConnectionManager) {
+-            return false;
+-        }
+-
+         if (mAttemptRecords.size() == 0) {
+             return false;
+         }
+@@ -254,7 +252,8 @@
+             return false;
+         }
+ 
+-        PhoneAccountHandle connectionManager = mPhoneAccountRegistrar.getSimCallManager();
++        PhoneAccountHandle connectionManager =
++                mPhoneAccountRegistrar.getSimCallManagerFromCall(mCall);
+         if (connectionManager == null) {
+             return false;
+         }
+@@ -266,8 +265,8 @@
+ 
+         // Connection managers are only allowed to manage SIM subscriptions.
+         // TODO: Should this really be checking the "calling user" test for phone account?
+-        PhoneAccount targetPhoneAccount = mPhoneAccountRegistrar.getPhoneAccountCheckCallingUser(
+-                targetPhoneAccountHandle);
++        PhoneAccount targetPhoneAccount = mPhoneAccountRegistrar
++                .getPhoneAccountUnchecked(targetPhoneAccountHandle);
+         if (targetPhoneAccount == null) {
+             Log.d(this, "shouldSetConnectionManager, phone account not found");
+             return false;
+@@ -285,10 +284,10 @@
+     private void adjustAttemptsForConnectionManager() {
+         if (shouldSetConnectionManager()) {
+             CallAttemptRecord record = new CallAttemptRecord(
+-                    mPhoneAccountRegistrar.getSimCallManager(),
++                    mPhoneAccountRegistrar.getSimCallManagerFromCall(mCall),
+                     mAttemptRecords.get(0).targetPhoneAccount);
+             Log.v(this, "setConnectionManager, changing %s -> %s", mAttemptRecords.get(0), record);
+-            mAttemptRecords.set(0, record);
++            mAttemptRecords.add(0, record);
+         } else {
+             Log.v(this, "setConnectionManager, not changing");
+         }
+@@ -296,11 +295,14 @@
+ 
+     // If we are possibly attempting to call a local emergency number, ensure that the
+     // plain PSTN connection services are listed, and nothing else.
+-    private void adjustAttemptsForEmergency()  {
++    private void adjustAttemptsForEmergency(PhoneAccountHandle preferredPAH) {
+         if (mCall.isEmergencyCall()) {
+             Log.i(this, "Emergency number detected");
+             mAttemptRecords.clear();
+-            List<PhoneAccount> allAccounts = mPhoneAccountRegistrar.getAllPhoneAccounts();
++            // Phone accounts in profile do not handle emergency call, use phone accounts in
++            // current user.
++            List<PhoneAccount> allAccounts = mPhoneAccountRegistrar
++                    .getAllPhoneAccountsOfCurrentUser();
+ 
+             if (allAccounts.isEmpty()) {
+                 // If the list of phone accounts is empty at this point, it means Telephony hasn't
+@@ -312,33 +314,44 @@
+                 allAccounts.add(TelephonyUtil.getDefaultEmergencyPhoneAccount());
+             }
+ 
++            // First, possibly add the SIM phone account that the user prefers
++            PhoneAccount preferredPA = mPhoneAccountRegistrar.getPhoneAccountUnchecked(
++                    preferredPAH);
++            if (preferredPA != null &&
++                    preferredPA.hasCapabilities(PhoneAccount.CAPABILITY_PLACE_EMERGENCY_CALLS) &&
++                    preferredPA.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)) {
++                Log.i(this, "Will try PSTN account %s for emergency",
++                        preferredPA.getAccountHandle());
++                mAttemptRecords.add(new CallAttemptRecord(preferredPAH, preferredPAH));
++            }
+ 
+-            // First, add SIM phone accounts which can place emergency calls.
++            // Next, add all SIM phone accounts which can place emergency calls.
++            TelephonyUtil.sortSimPhoneAccounts(mContext, allAccounts);
+             for (PhoneAccount phoneAccount : allAccounts) {
+                 if (phoneAccount.hasCapabilities(PhoneAccount.CAPABILITY_PLACE_EMERGENCY_CALLS) &&
+                         phoneAccount.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION)) {
+-                    Log.i(this, "Will try PSTN account %s for emergency",
+-                            phoneAccount.getAccountHandle());
+-                    mAttemptRecords.add(
+-                            new CallAttemptRecord(
+-                                    phoneAccount.getAccountHandle(),
+-                                    phoneAccount.getAccountHandle()));
++                    PhoneAccountHandle phoneAccountHandle = phoneAccount.getAccountHandle();
++                    // Don't add the preferred account since it has already been added previously.
++                    if (!phoneAccountHandle.equals(preferredPAH)) {
++                        Log.i(this, "Will try PSTN account %s for emergency", phoneAccountHandle);
++                        mAttemptRecords.add(new CallAttemptRecord(phoneAccountHandle,
++                                phoneAccountHandle));
++                    }
+                 }
+             }
+ 
+             // Next, add the connection manager account as a backup if it can place emergency calls.
+-            PhoneAccountHandle callManagerHandle = mPhoneAccountRegistrar.getSimCallManager();
+-            if (mShouldUseConnectionManager && callManagerHandle != null) {
++            PhoneAccountHandle callManagerHandle =
++                    mPhoneAccountRegistrar.getSimCallManagerOfCurrentUser();
++            if (callManagerHandle != null) {
+                 // TODO: Should this really be checking the "calling user" test for phone account?
+                 PhoneAccount callManager = mPhoneAccountRegistrar
+-                        .getPhoneAccountCheckCallingUser(callManagerHandle);
++                        .getPhoneAccountUnchecked(callManagerHandle);
+                 if (callManager != null && callManager.hasCapabilities(
+                         PhoneAccount.CAPABILITY_PLACE_EMERGENCY_CALLS)) {
+                     CallAttemptRecord callAttemptRecord = new CallAttemptRecord(callManagerHandle,
+-                            mPhoneAccountRegistrar.
+-                                    getOutgoingPhoneAccountForScheme(mCall.getHandle().getScheme())
+-                    );
+-
++                            mPhoneAccountRegistrar.getOutgoingPhoneAccountForSchemeOfCurrentUser(
++                                    mCall.getHandle().getScheme()));
+                     if (!mAttemptRecords.contains(callAttemptRecord)) {
+                         Log.i(this, "Will try Connection Manager account %s for emergency",
+                                 callManager);
+@@ -359,69 +372,78 @@
+         return result;
+     }
+ 
+-    private class Response implements CreateConnectionResponse {
+-        private final ConnectionServiceWrapper mService;
+ 
+-        Response(ConnectionServiceWrapper service) {
+-            mService = service;
++    private void notifyCallConnectionFailure(DisconnectCause errorDisconnectCause) {
++        if (mCallResponse != null) {
++            clearTimeout();
++            mCallResponse.handleCreateConnectionFailure(errorDisconnectCause);
++            mCallResponse = null;
++            mCall.clearConnectionService();
+         }
++    }
+ 
+-        @Override
+-        public void handleCreateConnectionSuccess(
+-                CallIdMapper idMapper,
+-                ParcelableConnection connection) {
+-            if (mResponse == null) {
+-                // Nobody is listening for this connection attempt any longer; ask the responsible
+-                // ConnectionService to tear down any resources associated with the call
+-                mService.abort(mCall);
+-            } else {
+-                // Success -- share the good news and remember that we are no longer interested
+-                // in hearing about any more attempts
+-                mResponse.handleCreateConnectionSuccess(idMapper, connection);
+-                mResponse = null;
+-                // If there's a timeout running then don't clear it. The timeout can be triggered
+-                // after the call has successfully been created but before it has become active.
+-            }
++    @Override
++    public void handleCreateConnectionSuccess(
++            CallIdMapper idMapper,
++            ParcelableConnection connection) {
++        if (mCallResponse == null) {
++            // Nobody is listening for this connection attempt any longer; ask the responsible
++            // ConnectionService to tear down any resources associated with the call
++            mService.abort(mCall);
++        } else {
++            // Success -- share the good news and remember that we are no longer interested
++            // in hearing about any more attempts
++            mCallResponse.handleCreateConnectionSuccess(idMapper, connection);
++            mCallResponse = null;
++            // If there's a timeout running then don't clear it. The timeout can be triggered
++            // after the call has successfully been created but before it has become active.
+         }
++    }
+ 
+-        private boolean shouldFallbackToNoConnectionManager(DisconnectCause cause) {
+-            PhoneAccountHandle handle = mCall.getConnectionManagerPhoneAccount();
+-            if (handle == null || !handle.equals(mPhoneAccountRegistrar.getSimCallManager())) {
+-                return false;
+-            }
+-
+-            ConnectionServiceWrapper connectionManager = mCall.getConnectionService();
+-            if (connectionManager == null) {
+-                return false;
+-            }
++    private boolean shouldFailCallIfConnectionManagerFails(DisconnectCause cause) {
++        // Connection Manager does not exist or does not match registered Connection Manager
++        // Since Connection manager is a proxy for SIM, fall back to SIM
++        PhoneAccountHandle handle = mCall.getConnectionManagerPhoneAccount();
++        if (handle == null || !handle.equals(mPhoneAccountRegistrar.getSimCallManagerFromCall(
++                mCall))) {
++            return false;
++        }
+ 
+-            if (cause.getCode() == DisconnectCause.CONNECTION_MANAGER_NOT_SUPPORTED) {
+-                Log.d(CreateConnectionProcessor.this, "Connection manager declined to handle the "
+-                        + "call, falling back to not using a connection manager");
+-                return true;
+-            }
++        // The Call's Connection Service does not exist
++        ConnectionServiceWrapper connectionManager = mCall.getConnectionService();
++        if (connectionManager == null) {
++            return true;
++        }
+ 
+-            if (!connectionManager.isServiceValid("createConnection")) {
+-                Log.d(CreateConnectionProcessor.this, "Connection manager unbound while trying "
+-                        + "create a connection, falling back to not using a connection manager");
+-                return true;
+-            }
++        // In this case, fall back to a sim because connection manager declined
++        if (cause.getCode() == DisconnectCause.CONNECTION_MANAGER_NOT_SUPPORTED) {
++            Log.d(CreateConnectionProcessor.this, "Connection manager declined to handle the "
++                    + "call, falling back to not using a connection manager");
++            return false;
++        }
+ 
++        if (!connectionManager.isServiceValid("createConnection")) {
++            Log.d(CreateConnectionProcessor.this, "Connection manager unbound while trying "
++                    + "create a connection, falling back to not using a connection manager");
+             return false;
+         }
+ 
+-        @Override
+-        public void handleCreateConnectionFailure(DisconnectCause errorDisconnectCause) {
+-            // Failure of some sort; record the reasons for failure and try again if possible
+-            Log.d(CreateConnectionProcessor.this, "Connection failed: (%s)", errorDisconnectCause);
+-            mLastErrorDisconnectCause = errorDisconnectCause;
+-            if (shouldFallbackToNoConnectionManager(errorDisconnectCause)) {
+-                mShouldUseConnectionManager = false;
+-                // Restart from the beginning.
+-                process();
+-            } else {
+-                attemptNextPhoneAccount();
+-            }
++        // Do not fall back from connection manager and simply fail call if the failure reason is
++        // other
++        Log.d(CreateConnectionProcessor.this, "Connection Manager denied call with the following " +
++                "error: " + cause.getReason() + ". Not falling back to SIM.");
++        return true;
++    }
++
++    @Override
++    public void handleCreateConnectionFailure(DisconnectCause errorDisconnectCause) {
++        // Failure of some sort; record the reasons for failure and try again if possible
++        Log.d(CreateConnectionProcessor.this, "Connection failed: (%s)", errorDisconnectCause);
++        if (shouldFailCallIfConnectionManagerFails(errorDisconnectCause)) {
++            notifyCallConnectionFailure(errorDisconnectCause);
++            return;
+         }
++        mLastErrorDisconnectCause = errorDisconnectCause;
++        attemptNextPhoneAccount();
+     }
+ }

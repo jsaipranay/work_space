@@ -1,0 +1,14 @@
+Explanation of project. 
+Which ipc used in yr project? 
+Linux booting process?
+Have u written any driver? 
+What modifications u did in Rtc or i2c driver?
+What is AT commands... Which AT commands u used in yr project? 
+What is probe how probe invokes? 
+How to register driver? 
+Diff between insmod and modprobe? 
+What is Dangling pointer and Null pointer. 
+What is shared memory ?what are the function used in shared memory? 
+How to register interrupt?
+ How interrupt works? 
+

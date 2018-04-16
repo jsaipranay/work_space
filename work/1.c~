@@ -1,0 +1,53 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<unistd.h>
+pthread_mutex_t mtx;
+
+void threadfun1(void *args);
+void threadfun2(void *args);
+int glob=0;
+main()
+{
+	int res;
+	int loop=100;
+	pthread_t tid1,tid2;
+	pthread_create(&tid1,NULL,threadfun1,&loop);
+	pthread_create(&tid2,NULL,threadfun2,&loop);
+	pthread_join(tid1,&res);
+	pthread_join(tid2,&res);
+	printf("%d",glob);
+}
+
+void threadfun1(void *args)
+{
+	int i,loop,loc;
+	loop=(*(int *)args);
+	pthread_mutex_lock(&mtx);
+	for(i=0;i<loop;i++)
+	{
+
+		loc=glob;
+		loc++;
+		glob=loc;
+
+	}
+	pthread_mutex_unlock(&mtx);
+}
+
+void threadfun2(void *args)
+{
+	int i,loop,loc;
+	loop=(*(int *)args);
+	pthread_mutex_lock(&mtx);
+		
+	for(i=0;i<loop;i++)
+	{
+
+		loc=glob;
+		loc++;
+		glob=loc;
+
+	}
+	pthread_mutex_unlock(&mtx);
+	
+}

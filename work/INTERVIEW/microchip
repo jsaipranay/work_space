@@ -1,0 +1,31 @@
+Below is the patten of microchip test paper.
+
+There are two section :
+(for both the section , revise printf and scanf format style as it was asked to take the value and print in certain manner )
+
+1> MCQs ---> in that following questions i remember , there were 12 questions.
+
+A> how to bit set/reset/test/toggle
+B> Which are the reserved keywords of c , list is given to select.
+C> program was written and asked to print the output , 3 variables are given but one is static , so consider that point.
+D>print the value of the given  expression like ++i||y++ ... , here you have to consider precedence
+E>if integer is divided by float and float is divided by integer what is the output
+F>which is happening at preprocessing time file inclusion , conditional compilation or macro expaasion or all of them.
+
+
+2>PROGRAMMING ROUND :--> in that following question i remember , there were 6 program.
+
+A> Take two array of 11 element as argument  and check that there are permutation of each other or not
+B> one string is given  then find the repeating string combination . for example
+"abababab" then  "ab" is the string we have to find out that is repeating , so after first "ab" there are three "ab" . so count is 3 .
+Now ,  find any repeating string  again ? yes "abab" is repeating . so count is 3(previous) + 1 .
+another example :
+if "aaaaab" then a is repeating string ... so "a" is repeating 4 times after first a , so count is 4 , now aa is repeating one time , so count is 4+1 = 5.
+C> Take array element as argument and save it into array. now find the number of element to remove such that array should follow the pattern of either increment or decrement or
+increment/decrement .
+for example one array is
+1 5 8 4 9 ; here from 1 to 5 to 8 is increasing but from 8 to 4 is decreasing but again increasing , so we have to take only 1 combination of increase and decrease as  after one decrease step increase of number is happening on the right side. so total 3 element are need in array to follow the increment and decrement patten and those
+three element are 5 8 4 , so output is two elements needed to remove.
+so same way think what if last element is highest one or first element is highest one ? then for last element if higher then find the numbers that follow increment pattern till highest number and if first element is major then find the numbers that follow decrement pattern.
+D>take size of the array element in one line and each member of array element in new line and print them in reverse with only one space between each element.
+

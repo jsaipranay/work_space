@@ -1,0 +1,10 @@
+#include<stdio.h>
+#include<string.h>
+main()
+{
+char str[20];
+char dst[20];
+scanf("%s",dst);
+strcpy(str,dst);
+printf("%s",str);
+}

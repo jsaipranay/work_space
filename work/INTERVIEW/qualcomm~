@@ -1,0 +1,84 @@
+"Q
+Drivers:
+1. Architecture of previously worked project
+2. USB Drivers flow
+3. V4L2 Framework architecture
+4. Flow in V4L2 framework (Application -> V4L2 -> Low level driver -> H/w)
+5. kernel threads
+
+Linux:
+1. what is process and thread
+2. What are Synchronization mechanism available???
+3. What are differences between mutex and semaphore???
+4. How will acheive synchronize among threads??
+5. priority inversion
+
+C :
+1. Explain about memory segments
+2. Storage class specifiers
+3. Volatile
+4. dangling pointer
+
+Data structures:
+1. Add node to double linked list
+2. Delete node in double linked list
+
+V4L2 driver
+
+Gstreamer:
+1. How to integrate gstreamer plugin with v4l2 framework??
+2. How ioctl communicate with gstreamer??
+
+V4l2 driver:
+1. How low level driver will register with v4l2 framework.
+2. What is file_operations?? What are capabilites will provided in file_operaions??
+3. When low level driver registering with v4l2 framework, what are basic file_operations you will register??
+4. What are ioctls commands available??
+5. Explain Querycapabilites ioctl command??
+6. How set_format and get_format works??
+7. Why can't use char device driver instead of v4l2 framework
+8. Why v4l2 framework
+9. Explain buffer management in v4l2
+10. For buffer management what are elements involved??
+11. What is vb2_queue??
+12. In which ioctl function, it will allocate buffers??
+13. What is functionality of prepare_buf??
+14. Do you know states in buffer management??
+15. what are v4l2 events?
+16. What is plan in v4l2 ?? What are planes present in v4l2 ??"
+1.Tell me about yourself.
+
+2.Explain Project.
+
+3.In project which formats you are using?
+
+4.what is the difference between yuyv(yuv) and mjpg(mp4) formats?
+
+5.what is the name of the sensor you are using?
+
+6.what is the input and output formats and which encoder used for conversion?
+
+7. what are the sub-devices used?
+
+8.explain gstreamer architecture?
+
+
+C & Linux:
+
+
+1.what is function pointer and it's uses?
+
+2.explain about volatile keyword.
+
+3.expalin storage classes?
+
+4.find the size of variable without using sizeof() operator?
+
+5.what is signal ?
+
+6.what is interupt latency?
+
+7.what is the difference between virtual memory and physical memory?
+
+8.what is mutex?
+

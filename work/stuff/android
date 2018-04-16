@@ -1,0 +1,58 @@
+architecture:
+
+
+
+application: the application dev are used to develop the code in c++(NDK),JAVA(SDK),dOTNET(MOONOLITHY),
+
+
+apllicaton frsme work:
+
+librasries:
+HAL:
+KERNEL LAYER:
+	
+
+
+
+DRM:
+HAL:
+
+IMAGE STRREAM PRODRUCER,   WINDOE POSITIONING,IMAGE STREAM CONSUMER,      HAL
+(CAMERA NDK,OPENGLES),     WIMDOW MANAGER     ,SURFACEFLINGER,OPENGLES,   GRALLOC,H\W COMPOSER
+DRIVER:
+IPC BINDER(INTENT.AIDL,BINDER,ASHMEM):
+AD GRAPHICD:
+APP1,APP2--->SURFACE--->SURFACE FLINGER---->FRAME BUFFER:
+
+2D ACCRELATING:
+
+OPENGL\ES
+:
+
+
+
+
+********************
+
+
+
+rdesktop -f 172.16.9.69
+
+adb shell logcat | tee '/home/juluri/Desktop/photospher.txt' 
+
+
+
+http://opensourceforu.com/2011/01/kernel-c-extras-in-a-linux-device-driver/
+
+
+
+
+http://q4interview.com/ques_ans.php?page=2&c=51
+
+
+
+https://www.raspberrypi.org/documentation/linux/kernel/building.md
+
+
+scp -r  filename user@ip /home/path
+

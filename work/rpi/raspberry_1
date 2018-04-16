@@ -1,0 +1,85 @@
+
+Creating Rasbperry pi and porting with SD card:
+
+
+
+1.First install Git and the build dependencies:
+
+
+sudo apt-get install git bc
+*******************************************************
+2.Next get the sources, which will take some time:
+
+git clone --depth=1 https://github.com/raspberrypi/linux
+******************************************************
+3.Build sources:
+
+To build the sources for cross-compilation, there may be extra dependencies beyond those you've installed by default with Ubuntu. If you find you need other things, please submit a pull request to change the documentation.
+
+Enter the following commands to build the sources and Device Tree files:
+
+For Pi 1, Pi 0, Pi 0 W, or Compute Module:
+
+cd linux
+KERNEL=kernel
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcmrpi_defconfig
+
+
+For Pi 2, Pi 3, or Compute Module 3:
+
+cd linux
+KERNEL=kernel7
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
+*********************************************************************************************
+
+4.Then, for both:
+
+make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs
+**************************************************************************************************
+5.nstall directly onto the SD card
+
+Having built the kernel, you need to copy it onto your Raspberry Pi and install the modules; this is best done directly using an SD card reader.
+
+First, use lsblk before and after plugging in your SD card to identify it. You should end up with something like this:
+
+sdb
+   sdb1
+   sdb2
+
+with sdb1 being the FAT (boot) partition, and sdb2 being the ext4 filesystem (root) partition.
+
+If it's a NOOBS card, you should see something like this:
+
+sdb
+  sdb1
+  sdb2
+  sdb5
+  sdb6
+  sdb7
+
+with sdb6 being the FAT (boot) partition, and sdb7 being the ext4 filesystem (root) partition.
+****************************************************************************************************
+6.Mount these first, adjusting the partition numbers for NOOBS cards:
+
+mkdir mnt
+mkdir mnt/fat32
+mkdir mnt/ext4
+sudo mount /dev/sdb1 mnt/fat32
+sudo mount /dev/sdb2 mnt/ext4
+*****************************************************************************************************
+7.Next, install the modules:
+
+sudo make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=mnt/ext4 modules_install
+*****************************************************************************************************
+8.Finally, copy the kernel and Device Tree blobs onto the SD card, making sure to back up your old kernel:
+
+sudo cp mnt/fat32/$KERNEL.img mnt/fat32/$KERNEL-backup.img
+sudo cp arch/arm/boot/zImage mnt/fat32/$KERNEL.img
+sudo cp arch/arm/boot/dts/*.dtb mnt/fat32/
+sudo cp arch/arm/boot/dts/overlays/*.dtb* mnt/fat32/overlays/
+sudo cp arch/arm/boot/dts/overlays/README mnt/fat32/overlays/
+sudo umount mnt/fat32
+sudo umount mnt/ext4
+***********************************************************************************************************
+
+
